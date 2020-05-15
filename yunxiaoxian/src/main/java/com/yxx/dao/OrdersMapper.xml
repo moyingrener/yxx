@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yxx.dao.OrdersMapper">
+    <resultMap id="OrdersResultMap" type="com.yxx.pojo.Orders">
+        <result column="orders_id" property="ordersId" />
+        <result column="goods_id" property="goodsId" />
+        <result column="status" property="status" />
+        <result column="buyer" property="buyer" />
+        <result column="seller" property="seller" />
+        <result column="create_time" property="createTime" />
+        <result column="buyer_status" property="buyerStatus" />
+        <result column="seller_status" property="sellerStatus" />
+    </resultMap>
+
+    <!-- 修改订单表用户的状态-“删除订单” -->
+    <update id="updateOrderOfUserStatus">
+        update orders
+        <set>
+            <if test="buyerOpenID != null">
+                buyer_status = 1
+            </if>
+            <if test="sellerOpenID != null">
+                seller_status = 1
+            </if>
+        </set>
+        where goods_id = #{goodsID}
+    </update>
+
+
+    <select id="blacklist" resultType="Integer" parameterType="String">
+        select count(orders_id) from orders
+        where (buyer = #{openID1} AND seller=#{openID2} AND buyer_status !=2)
+        OR (buyer = #{openID2} AND seller=#{openID1} AND seller_status !=2)
+    </select>
+
+    <select id="tradingRecord" resultType="Integer" parameterType="String">
+        select count(orders_id) from orders
+        where (buyer = #{openID1} AND seller=#{openID2} )
+        OR (buyer = #{openID2} AND seller=#{openID1})
+    </select>
+</mapper>

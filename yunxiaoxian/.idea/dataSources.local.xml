@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="dataSourceStorageLocal">
+    <data-source name="yxx@localhost" uuid="0c78cd56-1872-4928-8731-c75a3dc9ff87">
+      <database-info product="MySQL" version="5.5.54" jdbc-version="4.0" driver-name="MySQL Connector Java" driver-version="mysql-connector-java-5.1.47 ( Revision: fe1903b1ecb4a96a917f7ed3190d80c049b1de29 )" dbms="MYSQL" exact-version="5.5.54" exact-driver-version="5.1">
+        <extra-name-characters>#@</extra-name-characters>
+        <identifier-quote-string>`</identifier-quote-string>
+      </database-info>
+      <case-sensitivity plain-identifiers="lower" quoted-identifiers="lower" />
+      <secret-storage>master_key</secret-storage>
+      <user-name>root</user-name>
+      <schema-mapping />
+      <ssh-properties>
+        <enabled>false</enabled>
+        <ssh-config-id>01ee30bd-25fa-4fc6-97ad-88e273e21142</ssh-config-id>
+      </ssh-properties>
+    </data-source>
+  </component>
+</project>

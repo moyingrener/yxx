@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yxx.dao.ReplyMapper">
+    <resultMap id="ReplyResultMap" type="com.yxx.pojo.Reply">
+        <result column="reply_id" property="replyId" />
+        <result column="speaker" property="speaker"/>
+        <result column="speaker_image" property="speakerImage"/>
+        <result column="listener" property="listener"/>
+        <result column="seller" property="seller"/>
+        <result column="buyer" property="buyer"/>
+        <result column="create_time" property="createTime"/>
+        <result column="message" property="message"/>
+        <result column="message_number" property="messageNumber"/>
+        <result column="goods_id" property="goodsId" />
+    </resultMap>
+    <!--查询单个留言详细信息(属于该留言的所有对话)-->
+    <select id="selectDetailForOneReply" resultType="com.yxx.pojo.Reply">
+       select * from reply where message_number=#{messageNumber}
+        order by create_time asc
+        <if test="counts != null">
+            limit 3
+        </if>
+        <if test="currentPage != null">
+            limit #{currentPage},15
+        </if>
+
+    </select>
+
+    <!--根据messageNumber查询reply表中时间最早的一条记录-->
+    <select id="selectSpeakerAndListenerByMessageNumber" resultType="com.yxx.pojo.Reply" parameterType="java.lang.String">
+        select * from reply where message_number=#{messageNumber}
+        GROUP BY create_time asc
+        limit 1
+    </select>
+
+    <!--插入reply表-->
+    <insert id="insertReplyToReply" parameterType="com.yxx.pojo.Reply">
+        insert into reply set speaker=#{speaker},listener=#{listener},seller=#{seller},
+        buyer=#{buyer},create_time=#{createTime},message=#{message},message_number=#{messageNumber},
+        speaker_image=#{speakerImage},goods_id=#{goodsId}
+    </insert>
+
+</mapper>

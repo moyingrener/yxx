@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yxx.dao.ChatMapper">
+    <resultMap id="ChatResultMap" type="com.yxx.pojo.Chat">
+        <result column="chat_id" property="chatId" />
+        <result column="fromUser" property="fromUser" />
+        <result column="toUser" property="toUser" />
+        <result column="content" property="content" />
+        <result column="theTime" property="theTime" />
+        <result column="isPic" property="isPic" />
+    </resultMap>
+
+    <resultMap id="ChatListResultMap" type="com.yxx.pojo.ChatList">
+        <result column="chatList_id" property="chatListId" />
+        <result column="A_openID" property="AOpenID" />
+        <result column="B_openID" property="BOpenID" />
+        <result column="modifyTime" property="modifyTime" />
+    </resultMap>
+
+    <!-- 查找离线聊天信息 -->
+    <select id="selectChatMessage" resultType="com.yxx.pojo.Chat" parameterType="string">
+        select * from chat
+        where toUser = #{openID}
+    </select>
+
+    <!-- 删除离线聊天信息 -->
+    <delete id="deleteChatMessage" parameterType="string">
+        delete from chat
+        where toUser = #{openID}
+    </delete>
+
+    <!-- 保存离线聊天信息 -->
+    <insert id="insertChatMessage">
+        insert into chat(fromUser, toUser, content, theTime, goods_id, isPic, `type`)
+        values(#{fromUser}, #{toUser}, #{content}, #{theTime}, #{goodsId}, #{isPic}, #{type})
+    </insert>
+
+    <!-- 获取聊天列表 -->
+    <select id="getChatList" resultType="com.yxx.pojo.ChatList">
+        select c.*, u.user_name, u.user_image, g.status, g.goods_image, g.goods_price, g.openID as seller
+        from chatList c, user u, goods g
+        where u.openID = c.B_openID
+        and g.goods_id = c.goods_id
+        and A_openID = #{openID}
+        order by modifyTime desc
+        limit #{currentPage},15
+    </select>
+
+    <!-- 删除聊天列表 -->
+    <delete id="deleteChatList">
+        delete from chatList
+        where A_openID = #{A_openID}
+        and B_openID = #{B_openID}
+        and goods_id = #{goodsID}
+    </delete>
+
+    <!-- 增加聊天列表 -->
+    <insert id="insertChatList">
+        insert into chatList(A_openID, B_openID, goods_id, modifyTime)
+        values(#{AOpenID}, #{BOpenID}, #{goodsID}, #{modifyTime})
+        on duplicate key update
+        modifyTime = #{modifyTime}
+    </insert>
+
+    <!-- 上传聊天图片 -->
+    <insert id="insertImage" parameterType="string">
+        insert into image(image_name)
+        values(#{imageName})
+    </insert>
+
+    <!-- 上传聊天记录 -->
+    <insert id="uploadChatRecord">
+        insert into chatRecord(openID, fromUser, toUser, content, theTime, goods_id, isPic, isSelf, `type`)
+        values
+        <foreach collection="chatRecords" item="item" index="index" separator=",">
+            (
+                #{openID},
+                #{item.fromUser},
+                #{item.toUser},
+                #{item.content},
+                #{item.theTime},
+                #{item.goodsId},
+                #{item.isPic},
+                #{item.isSelf},
+                #{item.type}
+            )
+        </foreach>
+    </insert>
+
+    <!-- 获取聊天记录 -->
+    <select id="getChatRecordList" resultType="com.yxx.pojo.ChatRecord">
+        select chatRecord_id, fromUser, toUser, content, theTime, goods_id, isPic, isSelf, `type` from chatRecord
+        where openID = #{A_openID}
+        and goods_id = #{goodsId}
+        order by theTime desc
+        limit #{currentPage}, 20
+    </select>
+
+    <!-- 删除聊天记录 -->
+    <delete id="deleteChatRecord">
+        delete from chatRecord
+        where openID = #{A_openID}
+        and goods_id = #{goodsId}
+    </delete>
+
+</mapper>
+
+
+
+
+
+
+
+
+
+

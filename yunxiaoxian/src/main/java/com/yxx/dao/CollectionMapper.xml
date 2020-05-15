@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yxx.dao.CollectionMapper">
+
+    <!-- collection表的实体映射 -->
+    <resultMap id="CollectionResultMap" type="com.yxx.pojo.Collection">
+        <result column="collection_id" property="collectionId" />
+        <result column="goods_id" property="goodsId" />
+        <result column="openID" property="openID" />
+    </resultMap>
+
+    <!-- 根据用户的openID查询其所收藏的物品信息 -->
+    <select id="selectUserCollectionByOpenID" resultType="com.yxx.pojo.GoodsCustom">
+        select goods.*, user.* from goods,collection,user
+        where goods.goods_id = collection.goods_id
+        and user.openID = goods.openID
+        and collection.openID = #{openID}
+        limit #{currentPage}, 10
+    </select>
+
+    <!-- 根据用户的openID和goodsID查询是否收藏了商品 -->
+    <select id="selectCollectByOpenIdAndGoodsId">
+        select count(*) from collection where openID=#{openID} and goods_id=#{goodsId}
+    </select>
+
+    <!--将用户收藏物品信息存入collection表-->
+    <insert id="insertUserCollection">
+        insert into collection(goods_id,openID) values (#{goodsID},#{openID})
+    </insert>
+    
+    <!-- 根据openID和goodsID查询collection中的记录 -->
+    <select id="selectCollectionByGoodsIDAndOpenID" resultType="com.yxx.pojo.Collection">
+        select * from collection
+        where openID = #{openID}
+        and goods_id = #{goodsID}
+    </select>
+
+    <!-- 取消收藏 -->
+    <delete id="cancelCollection">
+        delete from collection
+        where goods_id = #{goodsID}
+        and openID = #{openID}
+    </delete>
+</mapper>

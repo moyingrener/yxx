@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns="http://www.springframework.org/schema/beans" xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:tool="http://www.springframework.org/schema/tool"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd http://www.springframework.org/schema/tool http://www.springframework.org/schema/tool/spring-tool.xsd ">
+
+    <mvc:annotation-driven conversion-service="conversion">
+        <mvc:message-converters>
+            <bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
+                <property name="objectMapper">
+                    <bean class="com.fasterxml.jackson.databind.ObjectMapper">
+                        <property name="dateFormat">
+                            <bean class="java.text.SimpleDateFormat">
+                                <constructor-arg type="java.lang.String" value="yyyy-MM-dd HH:mm:ss" />
+                            </bean>
+                        </property>
+                    </bean>
+                </property>
+            </bean>
+            <bean class="org.springframework.http.converter.StringHttpMessageConverter">
+                <constructor-arg value="UTF-8"/>
+            </bean>
+        </mvc:message-converters>
+    </mvc:annotation-driven>
+
+    <!-- 图片上传解析器 -->
+    <bean id="multipartResolver"
+          class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+        <property name="maxUploadSize" value="52428800"></property>
+    </bean>
+
+    <!-- 扫描controller包开启注解 -->
+    <context:component-scan base-package="com.yxx.controller"></context:component-scan>
+    <!-- 拦截器 -->
+    <!-- <mvc:interceptors> <mvc:interceptor> <mvc:mapping path="/user/**"/>
+        <bean class="com.myee.intercepter.Intercepter1"></bean> </mvc:interceptor>
+        </mvc:interceptors> -->
+
+    <!-- 引入静态资源 -->
+    <!-- <mvc:resources location="/statics/" mapping="/statics/**"></mvc:resources> -->
+
+    <!-- 配置转换器,并注入自定义转换器 ,再把转换器注册到spring容器 -->
+    <bean id="conversion" class="org.springframework.context.support.ConversionServiceFactoryBean">
+        <property name="converters">
+            <list>
+                <bean class="com.yxx.conversion.DateConversion"></bean>
+                <bean class="com.yxx.conversion.IntegerToString"></bean>
+            </list>
+        </property>
+    </bean>
+
+
+    <!-- 配置视图解析器 -->
+    <bean
+            class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="prefix" value="/WEB-INF/jsp/"/>
+        <property name="suffix" value=".jsp"/>
+    </bean>
+
+    <!-- 3.2 配置多个视图解析 -->
+    <!-- 	<bean
+            class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver">
+            <property name="viewResolvers">
+                <list>
+                    <bean
+                        class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+                        <property name="viewClass"
+                            value="org.springframework.web.servlet.view.JstlView" />
+                        <property name="prefix" value="/WEB-INF/jsp/" />
+                        <property name="suffix" value=".jsp" />
+                        注意：JSP的优先级要最低，即order要大，否则，HTML和velocity的页面会被解析到*.jsp
+                        <property name="order" value="3" />
+                    </bean>
+
+                    <bean
+                        class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+                        <property name="viewClass" value="org.knight.common.HtmlResourceView" />
+                        <property name="prefix" value="/WEB-INF/html/" />
+                        <property name="suffix" value=".html" />
+                        注意：自定义的HTML一定要比JSF的优先级高，即order要小，否则，HTML的页面会被解析成jsp
+                        <property name="order" value="1" />
+                    </bean>
+                </list>
+            </property>
+        </bean> -->
+
+    <!-- 全局异常设置 -->
+    <bean
+            class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">
+        <property name="exceptionMappings">
+            <props>
+                <prop key="java.lang.RuntionException">error</prop>
+            </props>
+        </property>
+    </bean>
+</beans>

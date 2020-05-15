@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yxx.dao.MessageMapper">
+    <resultMap id="MessageResultMap" type="com.yxx.pojo.Message">
+        <result column="message_id" property="messageId" />
+        <result column="goods_id" property="goodsId" />
+        <result column="message" property="message" />
+        <result column="openID" property="openID" />
+        <result column="create_time" property="createTime" />
+        <result column="message_number" property="messageNumber" />
+    </resultMap>
+    <!--    查询买家留言-->
+    <select id="selectAllMyMessage" resultType="com.yxx.pojo.MessageCustom">
+        select goods.goods_id,goods.goods_image,goods.goods_name,
+        reply.message,reply.create_time,reply.message_number,reply.speaker,
+        reply.speaker_image,reply.buyer,reply.listener from goods,reply
+        where goods.goods_id=reply.goods_id
+        and reply.listener=#{userName}
+        order by reply.create_time desc
+        limit #{currentPage},10
+    </select>
+
+    <!--    查询用户留言框分别对应的回复数量-->
+    <select id="selectOneMessageNumberForReplyCount" resultType="java.lang.Integer" parameterType="java.lang.String">
+         select count(*) from reply where message_number=#{messageNumber}
+    </select>
+
+    <!--根据goods_id,openID,message插入message表(留言)-->
+    <insert id="insertMessageByMessage" parameterType="com.yxx.pojo.Message">
+        insert into message set goods_id=#{goodsId},message=#{message},
+        openID=#{openID},create_time=#{createTime},message_number=#{messageNumber}
+    </insert>
+
+    <!--根据goodsId,openID查询留言框编号-->
+    <select id="selectMessageNumberByGoodsIDAndOpenID" resultType="java.lang.String">
+        select DISTINCT(message_number) from message
+        <where>
+            <if test="goodsId != null">
+                goods_id=#{goodsId}
+            </if>
+            <if test="openID != null and openID != ''">
+                and openID=#{openID}
+            </if>
+        </where>
+        ORDER BY create_time DESC
+        <if test="currentPage != null">
+            limit #{currentPage},6
+        </if>
+    </select>
+
+</mapper>

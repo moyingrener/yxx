@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yxx.dao.GoodsMapper">
+    <!--goods表实体映射-->
+    <resultMap id="GoodsResultMap" type="com.yxx.pojo.Goods">
+        <result column="goods_id" property="goodsId" />
+        <result column="goods_name" property="goodsName" />
+        <result column="goods_describe" property="goodsDescribe" />
+        <result column="goods_price" property="goodsPrice" />
+        <result column="goods_image" property="goodsImage" typeHandler="com.yxx.conversion.StringArrayTypeHandler"/>
+        <result column="category_id" property="categoryId" />
+        <result column="status" property="status" />
+        <result column="create_time" property="createTime" />
+        <result column="sale_time" property="saleTime" />
+        <result column="openID" property="openID" />
+    </resultMap>
+
+    <!--    搜索框 根据商品描述或类型查询商品信息(分页)-->
+    <select id="selectGoodsByGoodsDescribe" resultType="com.yxx.pojo.GoodsCustom" parameterType="com.yxx.pojo.Goods">
+        select * from user,goods
+        <where>
+            status=0 and user.openID=goods.openID
+            <if test="goodsDescribe!=null and goodsDescribe!=''">
+            and   goods_describe like CONCAT('%',#{goodsDescribe},'%')
+            or goods_name like CONCAT('%',#{goodsDescribe},'%')
+            </if>
+            <if test="categoryId!=null">
+             and category_id=#{categoryId}
+            </if>
+        </where>
+        group by goods.goods_id
+        order by create_time desc
+        limit #{currentPage},10
+
+    </select>
+
+    <!--    搜索框 根据商品描述或类型查询相应商品在商品表的记录数-->
+    <select id="selectCountByGoods" resultType="int" parameterType="com.yxx.pojo.Goods">
+        select count(*) from goods
+        <where>
+            status=0
+            <if test="goodsDescribe!=null and goodsDescribe!=''">
+             and goods_describe like CONCAT('%',#{goodsDescribe},'%')
+                or goods_name like CONCAT('%',#{goodsDescribe},'%')
+            </if>
+            <if test="categoryId!=null">
+            and category_id=#{categoryId}
+            </if>
+        </where>
+    </select>
+
+    <!--    查询单个商品的详细信息-->
+    <select id="selectOneGoodsByGoodsId" resultType="com.yxx.pojo.GoodsCustom" parameterType="com.yxx.pojo.Goods">
+        select * from user,goods where goods_id=#{goodsId} and user.openID=goods.openID;
+    </select>
+
+    <!--    查询我卖的商品信息-->
+    <select id="selectAllMySaleGoods" resultType="com.yxx.pojo.OrderCustom">
+        select * from orders, goods, user
+        where goods.openID = #{openID}
+        and orders.seller = #{openID}
+        and goods.goods_id = orders.goods_id
+        and orders.buyer=user.openID
+        and orders.seller_status = 0
+        order by orders.create_time desc
+        limit #{currentPage},10
+    </select>
+
+    <!--    查询我买的商品信息-->
+    <select id="selectAllMyBuyGoods" resultType="com.yxx.pojo.OrderCustom">
+        select * from orders, user, goods
+        where orders.buyer = #{openID}
+        and orders.seller = user.openID
+        and orders.goods_id = goods.goods_id
+        and orders.buyer_status = 0
+        order by orders.create_time desc
+        limit #{currentPage},10
+    </select>
+
+    <!--    查询我发布的商品信息-->
+    <select id="selectAllMyPublishGoods" resultType="com.yxx.pojo.Goods">
+        select * from goods
+        where goods.openID=#{openID}
+        and status != 2
+        order by goods.create_time desc
+        limit #{currentPage},10
+    </select>
+
+    <!--    上传商品-->
+    <insert id="uploadGoods"  parameterType="com.yxx.pojo.Goods">
+        insert into goods (goods_name,goods_describe,goods_price,goods_image,category_id,status,create_time,openID)
+        values(#{goodsName},#{goodsDescribe},#{goodsPrice},#{goodsImage},#{categoryId},#{status},#{createTime},#{openID})
+    </insert>
+
+    <!--根据商品所有信息修改更新商品信息-->
+    <update id="updateGoodsByGoods" parameterType="com.yxx.pojo.Goods">
+        update goods
+        <set>
+            <if test="goodsName!= null and goodsName != '' ">
+                goods_name=#{goodsName},
+            </if>
+            <if test="goodsDescribe!= null and goodsDescribe != '' ">
+                goods_describe=#{goodsDescribe},
+            </if>
+            <if test="goodsPrice!= null and goodsPrice != '' ">
+                goods_price=#{goodsPrice},
+            </if>
+            <if test="goodsImage!= null">
+                goods_image=#{goodsImage},
+            </if>
+            <if test="categoryId!= null">
+                category_id=#{categoryId},
+            </if>
+            <if test="createTime!= null">
+                create_time=#{createTime}
+            </if>
+        </set>
+         where openID=#{openID} and goods_id=#{goodsId}
+    </update>
+</mapper>

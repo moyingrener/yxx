@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yxx.dao.UserMapper">
+    <resultMap id="UserResultMap" type="com.yxx.pojo.User">
+        <result column="user_id" property="userId" />
+        <result column="openID" property="openID" />
+        <result column="user_name" property="userName" />
+        <result column="user_image" property="userImage" />
+        <result column="blacklist" property="blacklist" />
+    </resultMap>
+
+    <!-- 查询所有用户 -->
+    <select id="selectAllFormUser" resultType="com.yxx.pojo.User">
+        select * from user
+    </select>
+
+    <!-- 根据openID查询用户信息 -->
+    <select id="selectByOpenID" resultType="com.yxx.pojo.User" parameterType="string">
+        select * from user
+        where openID = #{openID}
+    </select>
+
+    <!-- 根据openID更新用户信息 -->
+    <update id="updateUserByOpenID" parameterType="com.yxx.pojo.User">
+        update user
+        <set>
+            <if test="userName != null and userName != ''">
+                user_name = #{userName},
+            </if>
+            <if test="userImage != null and userImage != ''">
+                user_image = #{userImage}
+            </if>
+        </set>
+        where openID = #{openID}
+    </update>
+
+    <!-- 注册用户 -->
+    <insert id="registerUser" parameterType="com.yxx.pojo.User">
+        insert into user(openID, user_name, user_image, blacklist)
+        values(#{openID}, #{userName}, #{userImage}, 0)
+    </insert>
+
+
+    <!--根据goods_id查询用户信息-->
+    <select id="selectUserByGoodsId" resultType="com.yxx.pojo.User" parameterType="java.lang.Integer">
+        select * from user,goods where goods.goods_id=#{goodsId} and goods.openID=user.openID
+    </select>
+
+    <!-- 更新用户在售物品状态 -->
+    <update id="updateMySoldGoodsStatus">
+        update goods
+        set status = 1
+        where openID = #{openID}
+        and goods_id = #{goodsId}
+        and status = 0;
+    </update>
+    
+    <!-- 增加订单 -->
+    <insert id="insertOrders">
+        insert into orders(goods_id, order_status, buyer, seller, create_time, buyer_status, seller_status)
+        values(#{goodsId}, 0, #{buyer}, #{seller}, #{create_time}, 0, 0)
+    </insert>
+
+    <!-- 擦亮物品 -->
+    <update id="updateGoodsCreateTime">
+        update goods
+        set create_time = #{newTime}
+        where goods_id = #{goodsID}
+        and openID = #{openID}
+        and timestampdiff(hour, create_time, #{newTime}) &gt;= 24
+    </update>
+
+    <!-- 下架或上架 -->
+    <update id="updateGoodsStatus">
+        update goods
+        <if test="flag == true">
+            set status = 2
+        </if>
+        <if test="flag == false">
+            set status = 0
+        </if>
+        where openID = #{openID}
+        and goods_id = #{goodsID}
+    </update>
+
+    <!-- 删除物品 -->
+    <delete id="deleteGoods">
+        delete from goods
+        where goods_id = #{goodsID}
+        and openID = #{openID}
+    </delete>
+
+    <update id="updateBlacklist">
+        update user
+        set blacklist = blacklist + 1
+        where openID = #{openID2}
+    </update>
+
+    <!-- 我的下架物品 -->
+    <select id="OffShelvesGoods" resultType="com.yxx.pojo.Goods">
+        select * from goods
+        where openID = #{openID}
+        and status = 2
+        order by create_time desc
+        limit #{currentPage},10
+    </select>
+</mapper>
