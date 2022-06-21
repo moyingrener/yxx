@@ -28,7 +28,7 @@
         <aspectjweaver.version>1.8.10</aspectjweaver.version>
         <servlet-api.version>8.5.32</servlet-api.version>
         <jsp-api.version>8.5.32</jsp-api.version>
-        <mysql-connector.version>5.1.6</mysql-connector.version>
+        <mysql-connector.version>8.0.28</mysql-connector.version>
         <commons-pool.version>1.5.4</commons-pool.version>
         <mchange-commons-java.version>0.2.9</mchange-commons-java.version>
 
